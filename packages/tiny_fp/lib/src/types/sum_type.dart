@@ -62,7 +62,7 @@ final class Just<T> extends Maybe<T> {
   bool operator ==(Object other) => other is Just<T> && other.value == value;
 
   @override
-  String toString() => "Nothing";
+  String toString() => "Just($value)";
 }
 
 sealed class Either<E, T> extends SumType<T> {
