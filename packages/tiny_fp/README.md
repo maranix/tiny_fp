@@ -1,6 +1,14 @@
 # tiny_fp
 
-A Haskell inspired tiny package to do functional programming in dart which doesn't get in your way and provides minimal paradigms along with base types to create your own custom types.
+<p align="center">
+    A Haskell inspired tiny package to do functional programming in dart which doesn't get in your way and provides minimal paradigms along with base types to create your own custom types.
+</p>
+
+<p align="center">
+    <img src="https://img.shields.io/badge/stage-alpha-red" />
+    <img src="https://img.shields.io/pub/v/tiny_fp?" />
+    <img src="https://img.shields.io/github/license/maranix/tiny_fp?logo=github" />
+</p>
 
 > [!WARNING]
 >
