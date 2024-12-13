@@ -2,7 +2,6 @@ name: tiny_fp
 description: A tiny library for functional programming in dart
 version: 0.1.0
 
-author: Raman Verma <ramanverma4183@gmail.com>
 homepage: https://github.com/maranix/tiny_fp
 repository: https://github.com/maranix/tiny_fp
 issue_tracker: https://github.com/maranix/tiny_fp/labels/tiny_fp

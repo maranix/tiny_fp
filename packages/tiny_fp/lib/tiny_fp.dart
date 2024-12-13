@@ -1,6 +1,6 @@
 /// Support for doing something awesome.
 ///
 /// More dartdocs go here.
-library tiny_fp;
+library;
 
 export "src/types/types.dart";
