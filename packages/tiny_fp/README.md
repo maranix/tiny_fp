@@ -49,19 +49,19 @@ This package was designed with the following goals in mind:
 
 | Type  | Derived By                             | Core Purpose                                    | Implemented |
 | ------------------- | -------------------------------------- | ---------------------------------------------- | ----------- |
-| `SumType<T>`        | `Maybe<T>`, `Either<E, T>`            | A generalized base type for algebraic sum types, representing one of multiple possible values. | ✅ |
+| `SumType<T>`        | `Maybe<T>`, `Either<E, T>`            | A generalized base type for algebraic sum types, representing one of multiple possible values. | ❌ |
 | `ProductType<A, B>`| `Tuple`                | Represents a composite type that combines multiple values of different types.                | ❌          |
-| `Functor<T>`       | `Maybe<T>`, `Either<E, T>` | Provides a way to apply functions to wrapped values inside a data structure.                  | ❌          |
-| `Applicative<T>`   | `Maybe<T>`, `Either<E, T>` | Extends `Functor` to allow applying functions inside a functor to values inside another functor. | ❌          |
-| `Monad<T>`         | `Maybe<T>`, `Either<E, T>` | Extends `Applicative` to support chaining of computations that return wrapped values.           | ❌          |
-| `Foldable<T>`      | `Maybe<T>` | Allows folding values inside a data structure into a single result.                           | ❌          |
+| `Functor<T>`       | `Maybe<T>`, `Either<E, T>` | Provides a way to apply functions to wrapped values inside a data structure.                  | ✅         |
+| `Applicative<T>`   | `Maybe<T>`, `Either<E, T>` | Extends `Functor` to allow applying functions inside a functor to values inside another functor. | ✅          |
+| `Monad<T>`         | `Maybe<T>`, `Either<E, T>` | Extends `Applicative` to support chaining of computations that return wrapped values.           | ✅         |
+| `Foldable<T>`      | `Maybe<T>` | Allows folding values inside a data structure into a single result.                           | ✅          |
 
 ### Built-in Types
 
 | Type      | Derived From            | Purpose                                                   | Implemented |
 | ------------------- | ----------------------- | --------------------------------------------------------- | ----------- |
-| `Maybe<T>`          | `SumType<T>`            | Represents an optional value (`Just` or `Nothing`).       | ✅          |
-| `Either<E, T>`      | `SumType<T>`            | Represents a value that is either a success (`Right`) or an error (`Left`). | ✅          |
+| `Maybe<T>`          | `SumType<T>`            | Represents an optional value (`Just` or `Nothing`).       | ❌          |
+| `Either<E, T>`      | `SumType<T>`            | Represents a value that is either a success (`Right`) or an error (`Left`). | ❌          |
 | `Tuple<A, B>`     | `ProductType<A, B>`| A tuple containing two values of different types.                                | ❌          |
 
 ## Getting Started
