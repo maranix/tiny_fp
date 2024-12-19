@@ -36,11 +36,10 @@ final class Box<T> extends HKT<Box, T>
   T extract() => value;
 
   @override
-  bool equals(Box<T> other) => value == other.value;
+  bool equals(Box<T> other) => identical(this, other) || value == other.value;
 
   @override
-  bool operator ==(covariant Box<T> other) =>
-      identical(this, other) && equals(other);
+  bool operator ==(covariant Box<T> other) => equals(other);
 
   @override
   int get hashCode => value.hashCode;
