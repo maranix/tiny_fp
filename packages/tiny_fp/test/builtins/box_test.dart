@@ -105,9 +105,9 @@ void main() {
       test("should handle complex nested types (Box<Box<T>>)", () {
         final box = Box(Box(42));
 
-        final result = box
-            .map<Box<String>>((nestedBox) => Box(nestedBox.value.toString()));
-        expect(result.extract().value, equals("42"));
+        final result = box.map<Box<String>>(
+            (nestedBox) => Box(nestedBox.extract().toString()));
+        expect(result.extract().extract(), equals("42"));
       });
 
       test("should handle transformations with null values", () {
@@ -188,7 +188,7 @@ void main() {
         final boxes = Box([box1, box2]);
 
         final result = boxes.map<List<String>>(
-            (list) => list.map((e) => "Value: ${e.value}").toList());
+            (list) => list.map((e) => "Value: ${e.extract()}").toList());
         expect(result.extract(), equals(["Value: 42", "Value: 100"]));
       });
 
@@ -242,7 +242,7 @@ void main() {
         final result = boxFn.ap(boxFn, boxVal);
 
         expect(result, isA<Box<Box<int>>>());
-        expect(result.extract().value, equals(10));
+        expect(result.extract().extract(), equals(10));
       });
 
       test("ap behaves correctly regardless of the order of operations", () {
@@ -326,14 +326,14 @@ void main() {
 
       test("ap should handle deeply nested Box types", () {
         final boxFn = Box<Box<String> Function(Box<int>)>(
-          (x) => Box("Nested Value: ${x.value}"),
+          (x) => Box("Nested Value: ${x.extract()}"),
         );
 
         final boxVal = Box<Box<int>>(Box(10));
         final result = boxFn.ap(boxFn, boxVal);
 
         expect(result, isA<Box<Box<String>>>());
-        expect(result.extract().value, equals("Nested Value: 10"));
+        expect(result.extract().extract(), equals("Nested Value: 10"));
       });
 
       test("pure should work with null value", () {
@@ -419,6 +419,141 @@ void main() {
         expect(result1.equals(result2), isTrue);
       });
 
+      test("flatten should reduce single-level nesting", () {
+        final nested = Box(Box(42));
+
+        final result = nested.flatten<int>();
+
+        expect(result, isA<Box<int>>());
+        expect(result.extract(), equals(42));
+      });
+
+      test(
+          "flatten should throw TypeError error on flattening to a different type",
+          () {
+        final nested = Box(Box(42));
+
+        expect(
+          () => nested.flatten<String>(),
+          throwsA(isA<TypeError>()),
+        );
+      });
+
+      test("flatten should handle deeply nested Box structures", () {
+        final nested = Box(Box(Box(Box(Box(42)))));
+
+        final result = nested.flatten<int>();
+
+        expect(result, isA<Box<int>>());
+        expect(result.extract(), equals(42));
+      });
+
+      test("flatten should handle single-layer Box", () {
+        final singleLayer = Box(42);
+
+        final result = singleLayer.flatten<int>();
+
+        expect(result, isA<Box<int>>());
+        expect(result.extract(), equals(42));
+      });
+
+      test("flatten should work with Box containing strings", () {
+        final nested = Box(Box(Box("Deep Nested")));
+
+        final result = nested.flatten<String>();
+
+        expect(result, isA<Box<String>>());
+        expect(result.extract(), equals("Deep Nested"));
+      });
+
+      test("flatten should work with Box containing complex objects", () {
+        final person = Person("Alice");
+        final nested = Box(Box(Box(person)));
+
+        final result = nested.flatten<Person>();
+
+        expect(result, isA<Box<Person>>());
+        expect(result.extract(), equals(person));
+        expect(result.extract().name, equals("Alice"));
+      });
+
+      test("flatten should handle Box containing lists", () {
+        final nested = Box(Box(Box([1, 2, 3, 4])));
+
+        final result = nested.flatten<List<int>>();
+
+        expect(result, isA<Box<List<int>>>());
+        expect(result.extract(), equals([1, 2, 3, 4]));
+      });
+
+      test("flatten should work with custom nested Boxes", () {
+        final nested = Box(Box(Box(Box(Box(Person("Alice"))))));
+
+        final result = nested.flatten<Person>();
+
+        expect(result, isA<Box<Person>>());
+        expect(result.extract(), isA<Person>());
+        expect(result.extract().name, equals("Alice"));
+      });
+
+      test("flatten should handle a Box of Box<Null>", () {
+        final nested = Box(Box(null));
+
+        final result = nested.flatten<Null>();
+
+        expect(result, isA<Box<Null>>());
+        expect(result.extract(), isNull);
+      });
+
+      test("flatten should handle a deeply nested Box of Box<Null>", () {
+        final nested = Box(Box(Box(Box(Box(null)))));
+
+        final result = nested.flatten<Null>();
+
+        expect(result, isA<Box<Null>>());
+        expect(result.extract(), isNull);
+      });
+
+      test("flatten should work with very deeply nested Boxes", () {
+        final nested = Box(Box(Box(Box(Box(Box(Box(Box(Box(100)))))))));
+
+        final result = nested.flatten<int>();
+
+        expect(result, isA<Box<int>>());
+        expect(result.extract(), equals(100));
+      });
+
+      test("flatten should handle nested Boxes with dynamic types", () {
+        final nested = Box(Box(Box<dynamic>(Box<dynamic>(42))));
+
+        final result = nested.flatten<int>();
+
+        expect(result, isA<Box<int>>());
+        expect(result.extract(), equals(42));
+      });
+
+      test(
+          "flatten should filter very deeply nested Boxes based on given type <R>",
+          () {
+        final nested = Box(Box(Box(Box(Box(Box(Box(Box(Box(100)))))))));
+
+        final result = nested.flatten<Box<int>>();
+
+        expect(result, isA<Box<Box<int>>>());
+        expect(result.extract().extract(), equals(100));
+      });
+
+      test("flatten should handle nested Boxes with complex and dynamic types",
+          () {
+        final nested = Box(Box<dynamic>(
+            Box<dynamic>(Box<Box<dynamic>>(Box("Dynamic String")))));
+
+        final result = nested.flatten<String>();
+
+        expect(result, isA<Box<String>>());
+        expect(result.extract(), equals("Dynamic String"));
+      });
+
       test("flatMap should transform the value correctly", () {
         final box = Box(5);
 
@@ -445,7 +580,7 @@ void main() {
         );
 
         expect(result, isA<Box<Box<String>>>());
-        expect(result.extract().value, equals("Hello World"));
+        expect(result.extract().extract(), equals("Hello World"));
       });
 
       test("flatMap should not flatten deeply nested structures", () {
@@ -454,7 +589,7 @@ void main() {
         final result = box.flatMap((x) => x);
 
         expect(result, isA<Box<Box<Box<Box<int>>>>>());
-        expect(result.extract().value.value.value, equals(42));
+        expect(result.extract().extract().extract().extract(), equals(42));
       });
 
       test("flatMap should handle an empty or null-like Box value", () {
@@ -479,7 +614,7 @@ void main() {
 
         final result = box.flatMap(
           (x) => x.flatMap(
-            (y) => Box(y.value.value * 3),
+            (y) => Box(y.extract().extract() * 3),
           ),
         );
 

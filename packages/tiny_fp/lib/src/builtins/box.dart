@@ -18,12 +18,12 @@ final class Box<T> extends HKT<Box, T>
         Monad<Box, T>,
         Identity<Box, T>,
         Eq<Box<T>> {
-  const Box(this.value);
+  const Box(T value) : _value = value;
 
-  final T value;
+  final T _value;
 
   @override
-  Box<R> map<R>(R Function(T) f) => Box(f(value));
+  Box<R> map<R>(R Function(T) f) => Box(f(_value));
 
   @override
   Box<R> pure<R>(R value) => Box(value);
@@ -31,25 +31,46 @@ final class Box<T> extends HKT<Box, T>
   @override
   Box<R> ap<S, R>(
     covariant Box<R Function(S)> boxFunc,
-    covariant Box<S> boxVal,
+    covariant Box<S> box,
   ) =>
-      pure(boxFunc.value(boxVal.value));
+      pure(boxFunc.extract()(box.extract()));
 
   @override
-  Box<R> flatMap<R>(covariant Box<R> Function(T) f) => f(value);
+  Box<R> flatMap<R>(covariant Box<R> Function(T) f) => f(_value);
 
   @override
-  T extract() => value;
+  Box<R> flatten<R>() {
+    dynamic current = this._value;
+
+    while (current is Box) {
+      if (current._value is R) {
+        return pure(current._value);
+      }
+
+      current = current._value;
+    }
+
+    // Ensure the final value matches the expected type
+    if (current is! R) {
+      throw TypeError();
+    }
+
+    return pure(current);
+  }
 
   @override
-  bool equals(Box<T> other) => identical(this, other) || value == other.value;
+  T extract() => _value;
+
+  @override
+  bool equals(Box<T> other) =>
+      identical(this, other) || _value == other.extract();
 
   @override
   bool operator ==(covariant Box<T> other) => equals(other);
 
   @override
-  int get hashCode => value.hashCode;
+  int get hashCode => _value.hashCode;
 
   @override
-  String toString() => "Box($value)";
+  String toString() => "Box($_value)";
 }
