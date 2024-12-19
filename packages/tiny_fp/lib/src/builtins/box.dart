@@ -1,3 +1,4 @@
+import "package:meta/meta.dart";
 import "package:tiny_fp/src/applicative.dart";
 import "package:tiny_fp/src/eq.dart";
 import "package:tiny_fp/src/functor.dart";
@@ -5,6 +6,11 @@ import "package:tiny_fp/src/hkt.dart";
 import "package:tiny_fp/src/identity.dart";
 import "package:tiny_fp/src/monad.dart";
 
+/// Box type implementing multiple abstractions:
+/// Functor, Applicative, Monad, Identity, and Eq.
+///
+/// - [T] is the type parameter.
+@immutable
 final class Box<T> extends HKT<Box, T>
     implements
         Functor<Box, T>,
