@@ -1,4 +1,3 @@
-import "package:meta/meta.dart";
 import "package:tiny_fp/src/hkt.dart";
 
 /// A container type that wraps a single value of type [T].
@@ -12,7 +11,6 @@ import "package:tiny_fp/src/hkt.dart";
 /// This class is designed to be used in functional programming paradigms, where
 /// the value inside the `Box` is not directly accessible but can be transformed
 /// and interacted with through the provided methods.
-@immutable
 final class Box<T> extends HKT<Box, T>
     implements
         Functor<Box, T>,
