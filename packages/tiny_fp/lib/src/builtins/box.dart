@@ -16,8 +16,8 @@ final class Box<T> extends HKT<Box, T>
         Functor<Box, T>,
         Applicative<Box, T>,
         Monad<Box, T>,
-        Identity<Box, T>,
-        Eq<Box<T>> {
+        Eq<Box, T>,
+        Identity<T> {
   const Box(T value) : _value = value;
 
   final T _value;
@@ -33,7 +33,7 @@ final class Box<T> extends HKT<Box, T>
     covariant Box<R Function(S)> boxFunc,
     covariant Box<S> box,
   ) =>
-      pure(boxFunc.extract()(box.extract()));
+      pure(boxFunc._value(box.extract()));
 
   @override
   Box<R> flatMap<R>(covariant Box<R> Function(T) f) => f(_value);
@@ -62,7 +62,7 @@ final class Box<T> extends HKT<Box, T>
   T extract() => _value;
 
   @override
-  bool equals(Box<T> other) =>
+  bool equals(covariant Box<T> other) =>
       identical(this, other) || _value == other.extract();
 
   @override
