@@ -25,8 +25,7 @@ part of "hkt.dart";
 ///    ```dart
 ///    container.flatMap(f).flatMap(g) == container.flatMap((x) => f(x).flatMap(g))
 ///    ```
-abstract interface class Monad<C extends HKTMarker, T>
-    extends Applicative<C, T> {
+abstract interface class Monad<C extends HKTMarker, T> extends Applicative<C, T> {
   /// Chains an operation that returns a new container (or context).
   ///
   /// This method allows you to chain operations that return new monadic values

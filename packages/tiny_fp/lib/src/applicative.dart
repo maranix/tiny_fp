@@ -23,8 +23,7 @@ part of "hkt.dart";
 /// final result = func.ap(func, value);  // Applies the function inside `func` to the value inside `value`.
 /// assert(result == Just(84));     // The function was applied, and the result is wrapped in `Just()`.
 /// ```
-abstract interface class Applicative<C extends HKTMarker, T>
-    extends Functor<C, T> {
+abstract interface class Applicative<C extends HKTMarker, T> extends Functor<C, T> {
   /// Wraps a raw value of type [R] into the container.
   ///
   /// This method takes a raw value and wraps it inside the container (or context).

@@ -12,12 +12,7 @@ import "package:tiny_fp/src/hkt.dart";
 /// the value inside the `Box` is not directly accessible but can be transformed
 /// and interacted with through the provided methods.
 final class Box<T> extends HKT<Box, T>
-    implements
-        Functor<Box, T>,
-        Applicative<Box, T>,
-        Monad<Box, T>,
-        Eq<Box, T>,
-        Identity<T> {
+    implements Functor<Box, T>, Applicative<Box, T>, Monad<Box, T>, Eq<Box, T>, Identity<T> {
   /// Creates a new [Box] instance wrapping the given [value].
   const Box(T value) : _value = value;
 
@@ -64,8 +59,7 @@ final class Box<T> extends HKT<Box, T>
   /// final result = boxFn.ap(boxVal); // Box(15)
   /// ```
   @override
-  Box<R> ap<R>(covariant Box<R Function(T)> boxFunc) =>
-      pure(boxFunc._value(_value));
+  Box<R> ap<R>(covariant Box<R Function(T)> boxFunc) => pure(boxFunc._value(_value));
 
   /// Flattens nested boxes into a single box.
   ///
@@ -136,8 +130,7 @@ final class Box<T> extends HKT<Box, T>
   /// final result = box1.equals(box2); // true
   /// ```
   @override
-  bool equals(covariant Box<T> other) =>
-      identical(this, other) || _value == other.extract();
+  bool equals(covariant Box<T> other) => identical(this, other) || _value == other.extract();
 
   @override
   bool operator ==(covariant Box<T> other) => equals(other);

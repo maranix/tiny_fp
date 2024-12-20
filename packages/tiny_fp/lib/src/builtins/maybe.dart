@@ -18,11 +18,7 @@ import "package:tiny_fp/src/hkt.dart";
 /// print(result.extract()); // 84
 /// ```
 sealed class Maybe<T> extends HKT<Maybe, T>
-    implements
-        Eq<Maybe, T>,
-        Functor<Maybe, T>,
-        Applicative<Maybe, T>,
-        Monad<Maybe, T> {
+    implements Eq<Maybe, T>, Functor<Maybe, T>, Applicative<Maybe, T>, Monad<Maybe, T> {
   const Maybe();
 
   /// A factory method that creates a `Just` container with the specified value.
@@ -371,8 +367,7 @@ final class Just<T> extends Maybe<T> implements Identity<T> {
   /// print(just1.equals(just3)); // false
   /// ```
   @override
-  bool equals(Just<T> other) =>
-      (identical(this, other) || this._value == other._value);
+  bool equals(Just<T> other) => (identical(this, other) || this._value == other._value);
 
   @override
   bool operator ==(Just<T> other) => equals(other);
@@ -470,8 +465,7 @@ final class Nothing extends Maybe<Never> {
   /// print(nothing1 == nothing2); // true
   /// ```
   @override
-  bool equals(Nothing other) =>
-      identical(this, other) || runtimeType == other.runtimeType;
+  bool equals(Nothing other) => identical(this, other) || runtimeType == other.runtimeType;
 
   @override
   bool operator ==(Nothing other) => equals(other);

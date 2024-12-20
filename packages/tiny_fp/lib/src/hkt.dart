@@ -7,7 +7,7 @@ part "monad.dart";
 /// Marker interface for types that implement Higher-Kinded Types (HKT).
 ///
 /// This interface ensures that only HKT-compatible types can implement abstractions.
-abstract interface class  HKTMarker {}
+abstract interface class HKTMarker {}
 
 /// Base type for High-Kinded Types (HKT)
 ///
