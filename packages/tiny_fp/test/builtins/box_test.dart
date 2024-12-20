@@ -219,7 +219,7 @@ void main() {
         final boxFn = Box<int Function(int)>((x) => x + 5);
         final boxVal = Box<int>(10);
 
-        final result = boxFn.ap(boxFn, boxVal);
+        final result = boxVal.ap(boxFn);
 
         expect(result, isA<Box<int>>());
         expect(result.extract(), equals(15));
@@ -229,7 +229,7 @@ void main() {
         final boxFn = Box<String Function(int)>((x) => "Value: $x");
         final boxVal = Box<int>(42);
 
-        final result = boxFn.ap(boxFn, boxVal);
+        final result = boxVal.ap(boxFn);
 
         expect(result, isA<Box<String>>());
         expect(result.extract(), equals("Value: 42"));
@@ -239,7 +239,7 @@ void main() {
         final boxFn = Box<Box<int> Function(int)>((x) => Box(x * 2));
         final boxVal = Box<int>(5);
 
-        final result = boxFn.ap(boxFn, boxVal);
+        final result = boxVal.ap(boxFn);
 
         expect(result, isA<Box<Box<int>>>());
         expect(result.extract().extract(), equals(10));
@@ -249,8 +249,8 @@ void main() {
         final boxFn = Box<int Function(int)>((x) => x + 5);
         final boxVal = Box<int>(10);
 
-        final result1 = boxFn.ap(boxFn, boxVal);
-        final result2 = boxVal.ap(boxFn, boxVal);
+        final result1 = boxVal.ap(boxFn);
+        final result2 = boxVal.ap(boxFn);
 
         expect(result1, isA<Box<int>>());
         expect(result1.runtimeType, equals(result2.runtimeType));
@@ -262,7 +262,7 @@ void main() {
         final boxFn = Box<int? Function(int)>((x) => null);
         final boxVal = Box<int>(5);
 
-        final result = boxFn.ap(boxFn, boxVal);
+        final result = boxVal.ap(boxFn);
 
         expect(result, isA<Box<int?>>());
         expect(result.extract(), isNull);
@@ -273,7 +273,7 @@ void main() {
         final boxVal = Box("str");
 
         expect(
-          () => boxFn.ap<String, int>(boxFn, boxVal),
+          () => boxVal.ap(boxFn),
           throwsA(isA<TypeError>()),
         );
       });
@@ -283,7 +283,7 @@ void main() {
             (list) => list.reduce((a, b) => a + b));
         final boxVal = Box<List<int>>([1, 2, 3, 4, 5]);
 
-        final result = boxFn.ap(boxFn, boxVal);
+        final result = boxVal.ap(boxFn);
 
         expect(result, isA<Box<int>>());
         expect(result.extract(), equals(15)); // Sum of the list
@@ -295,7 +295,7 @@ void main() {
         );
         final boxVal = Box<int Function(int)>((x) => x * 3);
 
-        final result = boxFn.ap(boxFn, boxVal);
+        final result = boxVal.ap(boxFn);
 
         expect(result, isA<Box<int>>());
         expect(result.extract(), equals(30));
@@ -305,7 +305,7 @@ void main() {
         final boxFn = Box<int Function(int)>((_) => 42); // Constant function
         final boxVal = Box<int>(99);
 
-        final result = boxFn.ap(boxFn, boxVal);
+        final result = boxVal.ap(boxFn);
 
         expect(result, isA<Box<int>>());
         expect(result.extract(), equals(42));
@@ -318,7 +318,7 @@ void main() {
         final boxVal = Box<int>(5);
 
         expect(
-          () => boxFn.ap(boxFn, boxVal),
+          () => boxVal.ap(boxFn),
           throwsA(isA<Exception>().having(
               (e) => e.toString(), "message", contains("Test exception"))),
         );
@@ -330,7 +330,7 @@ void main() {
         );
 
         final boxVal = Box<Box<int>>(Box(10));
-        final result = boxFn.ap(boxFn, boxVal);
+        final result = boxVal.ap(boxFn);
 
         expect(result, isA<Box<Box<String>>>());
         expect(result.extract().extract(), equals("Nested Value: 10"));
@@ -351,24 +351,34 @@ void main() {
       });
 
       test("ap should work when Box contains a curried function", () {
-        final boxFn = Box<int Function(int)>((x) => x * 2);
-        final intermediate = boxFn.ap(boxFn, Box<int>(5));
+        // A curried function that takes one parameter and returns another function
+        int Function(int) curriedFunc(int x) => (int y) => x + y;
 
-        final boxFn2 = Box<int Function(int)>((x) => x + 3);
-        final result = boxFn2.ap(boxFn2, intermediate);
+        // Box containing the first part of the curried function
+        final boxFn = Box<int Function(int)>(curriedFunc(2));
+
+        // Box containing the value to apply to the curried function
+        final boxVal = Box<int>(5);
+
+        // Applying the curried function using ap
+        final result = boxVal.ap(boxFn);
 
         expect(result, isA<Box<int>>());
-        expect(result.extract(), equals(13));
+        expect(result.extract(), equals(7)); // 2 + 5 = 7
       });
 
       test("pure followed by ap should behave as identity", () {
         final boxVal = Box<int>(42);
-        final result = Box<int>(42)
-            .pure<int Function(int)>((x) => x)
-            .ap<int, int>(Box((x) => x), boxVal);
 
+        // Wrap the identity function into a Box using pure
+        final identity = boxVal.pure<int Function(int)>((x) => x);
+
+        // Apply the identity function to the boxVal
+        final result = boxVal.ap(identity);
+
+        // The result should be identical to boxVal
         expect(result, isA<Box<int>>());
-        expect(result.extract(), equals(42));
+        expect(result.extract(), equals(boxVal.extract()));
       });
 
       test("pure should wrap a value into a new Box", () {
@@ -382,7 +392,7 @@ void main() {
         final boxFn = Box<int Function(int)>((x) => x * 3);
         final value = 10;
 
-        final result1 = boxFn.ap(boxFn, Box<int>(value));
+        final result1 = Box<int>(value).ap(boxFn);
         final result2 = Box<int>(value).map<int>((x) => x * 3);
 
         expect(result1, isA<Box<int>>());

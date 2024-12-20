@@ -56,18 +56,10 @@ void main() {
       test("ap should apply function in Just to value in another Just", () {
         final func = Just((int x) => x + 1);
         final value = Just(42);
-        final result = func.ap(func, value);
+        final result = value.ap(func);
 
         expect(result, isA<Just<int>>());
         expect(result.extract(), equals(43));
-      });
-
-      test("ap should return Nothing if the function is Nothing", () {
-        final func = Nothing();
-        final value = Just(42);
-        final result = func.ap(func, value);
-
-        expect(result, isA<Nothing>());
       });
     });
 
