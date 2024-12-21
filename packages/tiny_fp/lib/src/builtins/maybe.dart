@@ -18,7 +18,12 @@ import "package:tiny_fp/src/hkt.dart";
 /// print(result.extract()); // 84
 /// ```
 sealed class Maybe<T> extends HKT<Maybe, T>
-    implements Eq<Maybe, T>, Functor<Maybe, T>, Applicative<Maybe, T>, Monad<Maybe, T> {
+    implements
+        Identity<T>,
+        Eq<Maybe, T>,
+        Functor<Maybe, T>,
+        Applicative<Maybe, T>,
+        Monad<Maybe, T> {
   const Maybe();
 
   /// A factory method that creates a `Just` container with the specified value.
@@ -153,7 +158,10 @@ sealed class Maybe<T> extends HKT<Maybe, T>
   /// print(result.extract()); // 42
   /// ```
   @override
-  Maybe<R> ap<R>(covariant Maybe<R Function(T)> f);
+  Maybe<R> ap<R>(covariant Maybe<R Function(T)> f) => f.when(
+        just: (func) => map(func),
+        nothing: Maybe.nothing,
+      );
 
   /// Chains a computation that returns a new `Maybe` from the value inside the current `Maybe`.
   ///
@@ -179,6 +187,19 @@ sealed class Maybe<T> extends HKT<Maybe, T>
   @override
   Maybe<R> flatten<R>();
 
+  /// Extracts the value inside if this is `Just` otherwise throws [StateError].
+  ///
+  /// Example:
+  /// ```dart
+  /// final just = Just(42);
+  /// print(just.extract()); // 42
+  ///
+  /// final nothing = Nothing();
+  /// print(nothing.extract()); // throws StateError
+  /// ```
+  @override
+  T extract();
+
   /// Compares the current `Maybe` to another `Maybe` for equality.
   ///
   /// - Returns true if both containers are of the same type and their values are equal.
@@ -201,52 +222,6 @@ sealed class Maybe<T> extends HKT<Maybe, T>
   int get hashCode;
 }
 
-// sealed class Maybe<T> extends HKT<Maybe, T>
-//     implements
-//         Eq<Maybe, T>,
-//         Functor<Maybe, T>,
-//         Applicative<Maybe, T>,
-//         Monad<Maybe, T> {
-//   const Maybe();
-//
-//   R when<R>({
-//     required R Function(T) just,
-//     required R Function() nothing,
-//   }) =>
-//       switch (this) {
-//         Just<T>(:final _value) => just(_value),
-//         Nothing() => nothing(),
-//       };
-//
-//   bool get isJust;
-//
-//   bool get isNothing;
-//
-//   @override
-//   Maybe<R> map<R>(R Function(T) f);
-//
-//   @override
-//   Just<R> pure<R>(R value) => Just(value);
-//
-//   @override
-//   Maybe<R> ap<R>(covariant Maybe<R Function(T)> f);
-//
-//   @override
-//   Maybe<R> flatMap<R>(covariant Maybe<R> Function(T) f);
-//
-//   @override
-//   Maybe<R> flatten<R>();
-//
-//   @override
-//   bool equals(covariant Maybe<T> other);
-//
-//   @override
-//   bool operator ==(covariant Maybe<T> other);
-//
-//   @override
-//   int get hashCode;
-// }
-
 /// A concrete class that represents a value wrapped in a `Maybe` container.
 ///
 /// `Just<T>` is used to represent a valid value of type `T` inside a `Maybe` container.
@@ -262,7 +237,7 @@ sealed class Maybe<T> extends HKT<Maybe, T>
 /// // Access the value using extract:
 /// print(justValue.extract()); // 42
 /// ```
-final class Just<T> extends Maybe<T> implements Identity<T> {
+final class Just<T> extends Maybe<T> {
   /// Creates a `Just` instance containing the provided [value].
   ///
   /// Example usage:
@@ -289,20 +264,7 @@ final class Just<T> extends Maybe<T> implements Identity<T> {
   /// print(result.extract()); // 4
   /// ```
   @override
-  Just<R> map<R>(R Function(T) f) => pure(f(_value));
-
-  /// Applies the function inside the `Just` (a function of type `R Function(T)`) to the value
-  /// inside this `Just` container and returns a new `Just<R>`.
-  ///
-  /// Example:
-  /// ```dart
-  /// final justFn = Just<int Function(int)>((x) => x * 2);
-  /// final justVal = Just(5);
-  /// final result = justFn.ap(justVal);
-  /// print(result.extract()); // 10
-  /// ```
-  @override
-  Just<R> ap<R>(Just<R Function(T)> f) => pure(f._value(_value));
+  Maybe<R> map<R>(R Function(T) f) => pure(f(_value));
 
   /// Chains a computation that returns a new `Maybe` from the value inside the current `Maybe`.
   ///
@@ -315,7 +277,7 @@ final class Just<T> extends Maybe<T> implements Identity<T> {
   /// print(result.extract()); // 84
   /// ```
   @override
-  Just<R> flatMap<R>(Just<R> Function(T) f) => f(_value);
+  Maybe<R> flatMap<R>(Just<R> Function(T) f) => f(_value);
 
   /// Flattens a nested `Just` structure by recursively extracting values until a non-nested
   /// value is found. If the values inside the nested `Just` do not match the expected type `R`,
@@ -328,7 +290,7 @@ final class Just<T> extends Maybe<T> implements Identity<T> {
   /// print(result.extract()); // 42
   /// ```
   @override
-  Just<R> flatten<R>() {
+  Maybe<R> flatten<R>() {
     dynamic current = _value;
 
     while (current is Just) {
@@ -367,7 +329,8 @@ final class Just<T> extends Maybe<T> implements Identity<T> {
   /// print(just1.equals(just3)); // false
   /// ```
   @override
-  bool equals(Just<T> other) => (identical(this, other) || this._value == other._value);
+  bool equals(Just<T> other) =>
+      (identical(this, other) || this._value == other._value);
 
   @override
   bool operator ==(Just<T> other) => equals(other);
@@ -419,19 +382,7 @@ final class Nothing extends Maybe<Never> {
   /// print(result.isNothing); // true
   /// ```
   @override
-  Nothing map<R>(R Function(Never) f) => Nothing();
-
-  /// The `ap` function is a no-op for `Nothing`. It returns `Nothing` because there is no value
-  /// to apply the function to.
-  ///
-  /// Example:
-  /// ```dart
-  /// final nothing = Nothing();
-  /// final result = nothing.ap(Just((x) => x * 2));
-  /// print(result.isNothing); // true
-  /// ```
-  @override
-  Maybe<R> ap<R>(Maybe<R Function(Never)> f) => this;
+  Maybe<R> map<R>(R Function(Never) f) => Nothing();
 
   /// The `flatMap` function is a no-op for `Nothing`. Since there is no value, it simply returns `Nothing`.
   ///
@@ -442,7 +393,7 @@ final class Nothing extends Maybe<Never> {
   /// print(result.isNothing); // true
   /// ```
   @override
-  Nothing flatMap<R>(Nothing Function(Never) f) => this;
+  Maybe<R> flatMap<R>(Maybe<R> Function(Never) f) => this;
 
   /// The `flatten` function is a no-op for `Nothing`, returning `Nothing` regardless of the type `R`.
   ///
@@ -453,7 +404,11 @@ final class Nothing extends Maybe<Never> {
   /// print(result.isNothing); // true
   /// ```
   @override
-  Nothing flatten<Never>() => this;
+  Maybe<Never> flatten<Never>() => this;
+
+  @override
+  Never extract() => throw StateError(
+      "Tried to extract internal value from Nothing.\nNothing Does not contain a value.");
 
   /// Compares the current instance of `Nothing` to another instance of `Nothing`. Since `Nothing`
   /// is a singleton, two `Nothing` instances are considered equal if they are the same instance.
@@ -465,7 +420,8 @@ final class Nothing extends Maybe<Never> {
   /// print(nothing1 == nothing2); // true
   /// ```
   @override
-  bool equals(Nothing other) => identical(this, other) || runtimeType == other.runtimeType;
+  bool equals(Nothing other) =>
+      identical(this, other) || runtimeType == other.runtimeType;
 
   @override
   bool operator ==(Nothing other) => equals(other);

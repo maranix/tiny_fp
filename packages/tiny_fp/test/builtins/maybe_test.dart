@@ -54,11 +54,11 @@ void main() {
       });
 
       test("ap should apply function in Just to value in another Just", () {
-        final func = Just((int x) => x + 1);
-        final value = Just(42);
+        final func = Maybe.just((int x) => x + 1);
+        final value = Maybe.just(42);
         final result = value.ap(func);
 
-        expect(result, isA<Just<int>>());
+        expect(result, isA<Maybe<int>>());
         expect(result.extract(), equals(43));
       });
     });
