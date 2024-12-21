@@ -31,6 +31,30 @@ abstract class HKT<C, T> implements HKTMarker {
   ///
   /// This ensures that HKT is not directly instantiated but serves as a base
   /// for other high-kinded types.
-
   const HKT();
+}
+
+/// Base type for High-Kinded Types (HKT) containing two different types.
+///
+/// This abstraction allows us to represent types that take other types as parameters
+/// in a generic and reusable manner, enabling the implementation of advanced type
+/// constructs like `Functor`, `Applicative`, and `Monad`.
+///
+/// - [C] represents the constructor type (e.g., `Box`, `Maybe`).
+/// - [T] represents the contained or inner type.
+///
+/// All higher-kinded abstractions (`Functor`, `Applicative`, `Monad`, etc.) will
+/// extend this base class, ensuring consistent behavior across implementations.
+///
+/// Example:
+/// ```dart
+/// final class Box<T> extends HKT<Box, T> { ... }
+/// final class Maybe<T> extends HKT<Maybe, T> { ... }
+/// ```
+abstract class HKT2<C, A, B> implements HKTMarker {
+  /// Base constructor for HKT
+  ///
+  /// This ensures that HKT2 is not directly instantiated but serves as a base
+  /// for other high-kinded types with two values.
+  const HKT2();
 }
