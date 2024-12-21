@@ -8,6 +8,14 @@ void main() {
         final just = Just(42);
         expect(just.extract(), equals(42));
       });
+
+      test("extract should throw StateError for Nothing", () {
+        final nothing1 = Maybe.nothing();
+        final nothing2 = Nothing();
+
+        expect(() => nothing1.extract(), throwsStateError);
+        expect(() => nothing2.extract(), throwsStateError);
+      });
     });
 
     group("[Eq] :", () {
